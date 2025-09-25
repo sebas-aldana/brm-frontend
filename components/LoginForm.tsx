@@ -25,8 +25,13 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const loginResponse = await login(loginData);
-    if (loginResponse) {
-      router.push("/dashboard");
+    switch (loginResponse.user.role) {
+      case "cliente":
+        router.push("/shop");
+        break;
+      case "admin":
+        router.push("/dashboard");
+        break;
     }
   };
 

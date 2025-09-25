@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 
 import useProductsStore from "@/store/products";
+import usePurchaseStore from "@/store/purchase";
 
 // Tipo para los productos basado en tu estructura
 interface Product {
@@ -64,6 +65,7 @@ interface Product {
   entryDate: string;
   createdAt: string;
   updatedAt: string;
+  isNew?: boolean;
 }
 
 // Tipo para los items de compra basado en la estructura real
@@ -74,8 +76,6 @@ interface PurchaseItem {
   quantity: number;
   Product: Product;
 }
-
-// Tipo para las compras basado en la estructura real
 interface Purchase {
   batch?: string;
   id?: number;
@@ -87,101 +87,19 @@ interface Purchase {
   PurchaseItems?: PurchaseItem[];
 }
 
-// Datos de ejemplo basados en tu estructura
-
-const samplePurchases: Purchase[] = [
-  {
-    id: 4,
-    date: "2025-09-25T13:53:28.291Z",
-    total: 246,
-    createdAt: "2025-09-25T13:53:28.291Z",
-    updatedAt: "2025-09-25T13:53:28.291Z",
-    clientId: 1,
-    PurchaseItems: [
-      {
-        id: 3,
-        purchaseId: 4,
-        productId: 2,
-        quantity: 2,
-        Product: {
-          id: 2,
-          batch: "adfadfadf",
-          name: "motores",
-          price: 123,
-          availableQuantity: 14,
-          entryDate: "2022-09-27T23:00:00.000Z",
-          createdAt: "2025-09-25T12:54:39.481Z",
-          updatedAt: "2025-09-25T13:53:28.169Z",
-        },
-      },
-    ],
-  },
-  {
-    id: 3,
-    date: "2025-09-25T13:44:54.937Z",
-    total: 246,
-    createdAt: "2025-09-25T13:44:54.937Z",
-    updatedAt: "2025-09-25T13:44:54.937Z",
-    clientId: 1,
-    PurchaseItems: [
-      {
-        id: 2,
-        purchaseId: 3,
-        productId: 2,
-        quantity: 2,
-        Product: {
-          id: 2,
-          batch: "adfadfadf",
-          name: "motores",
-          price: 123,
-          availableQuantity: 14,
-          entryDate: "2022-09-27T23:00:00.000Z",
-          createdAt: "2025-09-25T12:54:39.481Z",
-          updatedAt: "2025-09-25T13:53:28.169Z",
-        },
-      },
-    ],
-  },
-  {
-    id: 1,
-    date: "2025-09-25T12:56:03.555Z",
-    total: 246,
-    createdAt: "2025-09-25T12:56:03.556Z",
-    updatedAt: "2025-09-25T12:56:03.556Z",
-    clientId: 1,
-    PurchaseItems: [
-      {
-        id: 1,
-        purchaseId: 1,
-        productId: 2,
-        quantity: 2,
-        Product: {
-          id: 2,
-          batch: "adfadfadf",
-          name: "motores",
-          price: 123,
-          availableQuantity: 14,
-          entryDate: "2022-09-27T23:00:00.000Z",
-          createdAt: "2025-09-25T12:54:39.481Z",
-          updatedAt: "2025-09-25T13:53:28.169Z",
-        },
-      },
-    ],
-  },
-];
-
 export default function DashboardPage() {
-  const { products, fetchProducts, deleteProduct, updateProduct } =
+  const { products, fetchProducts, deleteProduct, updateProduct, addProduct } =
     useProductsStore();
+  const { purchases, fetchPurchases } = usePurchaseStore();
 
   useEffect(() => {
     fetchProducts();
+    fetchPurchases();
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [purchaseSearchTerm, setPurchaseSearchTerm] = useState("");
 
-  const [purchases] = useState<Purchase[]>(samplePurchases);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -251,7 +169,7 @@ export default function DashboardPage() {
 
   const totalPurchases = purchases.length;
   const totalSales = purchases.reduce(
-    (sum, purchase) => sum + (purchase.total ?? 0),
+    (sum: number, purchase: Purchase) => sum + (purchase.total ?? 0),
     0
   );
   const totalItemsSold = purchases.reduce(
@@ -271,7 +189,12 @@ export default function DashboardPage() {
 
   const handleSaveProduct = () => {
     if (!editingProduct) return;
-    updateProduct(editingProduct.id, editingProduct);
+    console.log(editingProduct);
+    if (editingProduct.isNew) {
+      addProduct(editingProduct);
+    } else {
+      updateProduct(editingProduct.id, editingProduct);
+    }
     setIsEditDialogOpen(false);
     setEditingProduct(null);
   };
@@ -405,6 +328,7 @@ export default function DashboardPage() {
                         entryDate: new Date().toISOString(),
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
+                        isNew: true,
                       };
                       setEditingProduct(newProduct);
                       setIsEditDialogOpen(true);
@@ -615,7 +539,7 @@ export default function DashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredPurchases.map((purchase) => (
+                      {filteredPurchases.map((purchase: Purchase) => (
                         <TableRow key={purchase.id}>
                           <TableCell className="font-medium">
                             #{purchase.id}
@@ -623,7 +547,7 @@ export default function DashboardPage() {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
-                              {formatDateTime(purchase.date || '')}
+                              {formatDateTime(purchase.date || "")}
                             </div>
                           </TableCell>
                           <TableCell>

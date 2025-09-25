@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/card";
 import { login, register } from "@/store/auth";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -31,8 +38,13 @@ export function RegisterForm() {
       email: registerData.email,
       password: registerData.password,
     });
-    if (loginResponse) {
-      router.push("/dashboard");
+    switch (loginResponse.user.role) {
+      case "cliente":
+        router.push("/shop");
+        break;
+      case "admin":
+        router.push("/dashboard");
+        break;
     }
   };
 
@@ -85,6 +97,23 @@ export function RegisterForm() {
               minLength={6}
               required
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="role">Rol</Label>
+            <Select
+              value={registerData.role}
+              onValueChange={(value) =>
+                setRegisterData({ ...registerData, role: value })
+              }
+            >
+              <SelectTrigger id="role" className="w-full">
+                <SelectValue placeholder="Selecciona un rol" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cliente">Cliente</SelectItem>
+                <SelectItem value="admin">Administrador</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Button

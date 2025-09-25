@@ -32,9 +32,7 @@ const useProductsStore = create(
       addProduct: async (product) => {
         try {
           const { data } = await api.post(API_URL, product);
-          set((state) => ({
-            products: [...state.products, data],
-          }));
+          get().fetchProducts();
           return data;
         } catch (error) {
           console.error("Error adding product:", error);
