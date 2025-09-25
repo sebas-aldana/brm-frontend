@@ -57,7 +57,7 @@ import usePurchaseStore from "@/store/purchase";
 
 // Tipo para los productos basado en tu estructura
 interface Product {
-  id: number;
+  id?: number;
   batch: string;
   name: string;
   price: number;
@@ -110,7 +110,7 @@ export default function DashboardPage() {
       (product: Product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.batch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.id.toString().includes(searchTerm)
+        (product.id?.toString() || '').includes(searchTerm)
     );
   }, [products, searchTerm]);
 
@@ -320,7 +320,6 @@ export default function DashboardPage() {
                   <Button
                     onClick={() => {
                       const newProduct: Product = {
-                        id: 0, // Temporary ID, will be replaced by the backend
                         batch: "",
                         name: "",
                         price: 0,
